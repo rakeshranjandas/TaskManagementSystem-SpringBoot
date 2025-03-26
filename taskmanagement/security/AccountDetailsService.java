@@ -23,6 +23,9 @@ public class AccountDetailsService implements UserDetailsService {
         Account account = accountsRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User name not found!"));
 
-        return new AccountAdapter(account);
+        return User.withUsername(username)
+                .password(account.getPassword())
+                .authorities(List.of())
+                .build();
     }
 }
