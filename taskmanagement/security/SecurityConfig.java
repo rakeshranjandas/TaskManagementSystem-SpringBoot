@@ -82,6 +82,7 @@ public class SecurityConfig {
                 .build();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
+
     }
 
     @Bean
@@ -89,6 +90,21 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
 
+
+
+
+    // Seems like this has to be declared to support multiple types of authentication.
+    //
+    // It was working before, in Task #2, when there was only Basic Authentication.
+    // That time Spring created automatically the beans for DaoAuthenticationProvider and AuthenticationManager.
+    // But now, it isn't working.
+    // May be due to presence of new AuthenticationProviders, like AccessTokenAuthenticationProviders,
+    // it demands explicit declaration.
+    //
+    // -- UPDATE --
+    // When I deleted the custom AuthenticationProvider(AccessTokenAuthenticationProvider), now it
+    // works when I dont explicitly declare AuthenticationManager or DaoAuthenticationProvider
+    /*
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService,
                                                                PasswordEncoder passwordEncoder) {
@@ -98,16 +114,9 @@ public class SecurityConfig {
         return provider;
     }
 
-    // Seems like this has to be declared to support multiple types of authentication.
-    //
-    // It was working before, in Task #2, when there was only Basic Authentication.
-    // That time Spring created automatically the beans for DaoAuthenticationProvider and AuthenticationManager.
-    // But now, it isn't working.
-    // May be due to presence of new AuthenticationProviders, like AccessTokenAuthenticationProviders,
-    // it demands explicit declaration.
     @Bean
-    public AuthenticationManager authenticationManager(DaoAuthenticationProvider daoAuthProvider,
-                                                       AccessTokenAuthenticationProvider tokenProvider) {
+    public AuthenticationManager authenticationManager(DaoAuthenticationProvider daoAuthProvider) {
         return new ProviderManager(List.of(tokenProvider, daoAuthProvider));
     }
+    */
 }
