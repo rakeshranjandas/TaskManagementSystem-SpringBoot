@@ -39,15 +39,9 @@ import java.util.UUID;
 
 @Configuration
 public class SecurityConfig {
-    private final AccessTokenAuthenticationProvider provider;
-
-    public SecurityConfig(AccessTokenAuthenticationProvider provider) {
-        this.provider = provider;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        BearerTokenAuthenticationFilter
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
@@ -61,8 +55,15 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/shutdown").permitAll() // required for tests
                         .requestMatchers("/h2-console/**").permitAll() // expose H2 console
                         .requestMatchers(HttpMethod.POST, "/token").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/accounts").permitAll()
                         .anyRequest().authenticated()) // All requests must be authenticated
-                .csrf(AbstractHttpConfigurer::disable) // Disabling CSRF
+                .csrf(AbstractHttpConfigurer::disable) // allow modifying requests from tests
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+                .sessionManagement(sessions ->
+                        sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no session
+                )
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults())
                 .build();
     }
 
@@ -89,26 +90,24 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("user")
-                .password("{noop}123")
-                .authorities("ROLE_USER")
-                .build();
-        var userManager = new InMemoryUserDetailsManager();
-        userManager.createUser(user);
-        return userManager;
+    public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService,
+                                                               PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
     }
 
+    // Seems like this has to be declared to support multiple types of authentication.
+    //
+    // It was working before, in Task #2, when there was only Basic Authentication.
+    // That time Spring created automatically the beans for DaoAuthenticationProvider and AuthenticationManager.
+    // But now, it isn't working.
+    // May be due to presence of new AuthenticationProviders, like AccessTokenAuthenticationProviders,
+    // it demands explicit declaration.
     @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        return new ProviderManager(authenticationProvider());
+    public AuthenticationManager authenticationManager(DaoAuthenticationProvider daoAuthProvider,
+                                                       AccessTokenAuthenticationProvider tokenProvider) {
+        return new ProviderManager(List.of(tokenProvider, daoAuthProvider));
     }
 }
