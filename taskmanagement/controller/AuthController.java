@@ -1,51 +1,29 @@
 package taskmanagement.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import taskmanagement.entity.AccessToken;
-import taskmanagement.repository.AccessTokenRepository;
 
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/demo")
-public class DemoController {
-
-    @Autowired
-    private JwtEncoder jwtEncoder;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @GetMapping("/hello")
-    public String hello(Authentication authentication) {
-        return "Hello, " + authentication.getName() +
-                ". Your authorities are: " + authentication.getAuthorities();
-    }
+@RequestMapping("/api/auth")
+public class AuthController {
 
     @PostMapping("/token")
     public String token(HttpServletRequest request) {
-        System.out.println(request);
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Basic ")) {
             throw new BadCredentialsException("Full authentication is required");
@@ -78,4 +56,5 @@ public class DemoController {
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
+
 }
