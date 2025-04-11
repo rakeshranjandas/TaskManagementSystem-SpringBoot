@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequestScope
-public class JWTTokenGenerator {
+public class JwtTokenGenerator {
 
     @Autowired
     private JwtEncoder jwtEncoder;
@@ -37,7 +37,7 @@ public class JWTTokenGenerator {
                 .subject(authentication.getName())
                 .claim("scope", authorities)
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(60, ChronoUnit.SECONDS))
+                .expiresAt(Instant.now().plus(180, ChronoUnit.SECONDS))
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
