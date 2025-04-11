@@ -9,16 +9,17 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.KeyPair;
@@ -35,10 +36,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomJwtAuthenticationConvertor converter) throws Exception {
         return http
                 .httpBasic(Customizer.withDefaults())  // Enabling HTTP Basic Authentication
-                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults())) // Enabling JWT authentication
+                .oauth2ResourceServer(
+                        oauth -> oauth
+                                .jwt(jwt -> jwt.jwtAuthenticationConverter(converter))
+                ) // Enabling JWT authentication
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll() // expose the /error endpoint
                         .requestMatchers("/actuator/shutdown").permitAll() // required for tests
@@ -79,7 +83,6 @@ public class SecurityConfig {
     public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource)   {
         return new NimbusJwtEncoder(jwkSource);
     }
-
 
 
     // Seems like this has to be declared to support multiple types of authentication.
