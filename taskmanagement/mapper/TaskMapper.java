@@ -2,6 +2,7 @@ package taskmanagement.mapper;
 
 import org.springframework.stereotype.Component;
 import taskmanagement.dto.TaskDTO;
+import taskmanagement.dto.TaskWithTotalCommentsDTO;
 import taskmanagement.entity.Task;
 
 import java.util.ArrayList;
@@ -17,13 +18,12 @@ public class TaskMapper {
                 task.getDescription(),
                 task.getStatus().name(),
                 task.getAuthor().getUsername(),
-                task.getAssignee() == null ? Task.NO_ASSIGNEE: task.getAssignee().getUsername(),
-                task.getComments().size()
+                task.getAssignee() == null ? Task.NO_ASSIGNEE: task.getAssignee().getUsername()
         );
     }
 
     public List<TaskDTO> toDTO(Iterable<Task> tasks) {
-        ArrayList<TaskDTO> tasksDTO = new ArrayList<>();
+        List<TaskDTO> tasksDTO = new ArrayList<>();
 
         for (Task task: tasks) {
             tasksDTO.add(toDTO(task));
@@ -32,4 +32,20 @@ public class TaskMapper {
         return tasksDTO;
     }
 
+    public TaskWithTotalCommentsDTO toDTOWithTotalComments(Task task) {
+        return new TaskWithTotalCommentsDTO(
+                toDTO(task),
+                task.getComments().size()
+        );
+    }
+
+    public List<TaskWithTotalCommentsDTO> toDTOWithTotalComments(List<Task> tasks) {
+        List<TaskWithTotalCommentsDTO> tasksDTO = new ArrayList<>();
+
+        for (Task task: tasks) {
+            tasksDTO.add(toDTOWithTotalComments(task));
+        }
+
+        return tasksDTO;
+    }
 }

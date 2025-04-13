@@ -19,7 +19,9 @@ public interface TasksRepository extends JpaRepository<Task, Long> {
 
     @Query("""
         SELECT t FROM Task t
-        LEFT JOIN t.assignee a
+        JOIN FETCH t.author r
+        LEFT JOIN FETCH t.assignee a
+        LEFT JOIN FETCH t.comments c
         WHERE (:author IS NULL OR t.author.username = :author)
           AND (:assignee IS NULL OR t.assignee.username = :assignee)
         ORDER BY t.id DESC

@@ -11,3 +11,9 @@
 - filtering by author and assignee is now with JPQL. Is there a better way?
     What when more such filtering parameters are added.
         (Spandan suggests - Use Criteria/Specifications)
+
+
+- Check sql generated for GET tasks. Why is it being printed twice?
+
+
+- Refactor TaskService. Extract method for validation_of_task.

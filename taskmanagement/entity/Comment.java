@@ -13,6 +13,10 @@ public class Comment {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author")
+    private Account author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
 
@@ -22,6 +26,14 @@ public class Comment {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Account getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Account author) {
+        this.author = author;
     }
 
     public String getText() {

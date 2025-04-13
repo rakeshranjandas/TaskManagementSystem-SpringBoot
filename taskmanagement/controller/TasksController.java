@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import taskmanagement.dto.CommentDTO;
 import taskmanagement.dto.TaskDTO;
+import taskmanagement.dto.TaskWithTotalCommentsDTO;
+import taskmanagement.entity.Comment;
 import taskmanagement.entity.Task;
 import taskmanagement.request.AddCommentRequest;
 import taskmanagement.request.AssignTaskRequest;
@@ -23,11 +26,11 @@ public class TasksController {
     private TasksService tasksService;
 
     @GetMapping
-    public ResponseEntity<List<TaskDTO>> getTasks(
+    public ResponseEntity<List<TaskWithTotalCommentsDTO>> getTasks(
             @RequestParam(name = "author", required = false) String author,
             @RequestParam(name = "assignee", required = false) String assignee
     ) {
-        List<TaskDTO> tasks = tasksService.getAll(author, assignee);
+        List<TaskWithTotalCommentsDTO> tasks = tasksService.getAll(author, assignee);
 
         return new ResponseEntity(tasks, HttpStatus.OK);
     }
@@ -52,4 +55,12 @@ public class TasksController {
         tasksService.addComment(taskId, addCommentRequest);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("/{taskId}/comments")
+    public ResponseEntity<List<CommentDTO>> getComments(@PathVariable("taskId") Long taskId) {
+        List<CommentDTO> comments = tasksService.getComments(taskId);
+
+        return new ResponseEntity(comments, HttpStatus.OK);
+    }
+
 }

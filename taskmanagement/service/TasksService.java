@@ -7,7 +7,9 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import taskmanagement.dto.CommentDTO;
 import taskmanagement.dto.TaskDTO;
+import taskmanagement.dto.TaskWithTotalCommentsDTO;
 import taskmanagement.entity.Account;
 import taskmanagement.entity.Comment;
 import taskmanagement.entity.Task;
@@ -16,8 +18,10 @@ import taskmanagement.exception.ForbiddenAssignException;
 import taskmanagement.exception.InvalidAssigneeException;
 import taskmanagement.exception.InvalidTaskStatusException;
 import taskmanagement.exception.TaskNotFoundException;
+import taskmanagement.mapper.CommentMapper;
 import taskmanagement.mapper.TaskMapper;
 import taskmanagement.repository.AccountsRepository;
+import taskmanagement.repository.CommentsRepository;
 import taskmanagement.repository.TasksRepository;
 import taskmanagement.request.AddCommentRequest;
 import taskmanagement.request.AssignTaskRequest;
@@ -38,7 +42,13 @@ public class TasksService {
     private TaskMapper taskMapper;
 
     @Autowired
+    private CommentMapper commentMapper;
+
+    @Autowired
     private AccountsRepository accountsRepository;
+
+    @Autowired
+    private CommentsRepository commentsRepository;
 
     private Account getAccount() {
         AccountAdapter accountAdapter = (AccountAdapter) SecurityContextHolder
@@ -60,14 +70,14 @@ public class TasksService {
         return taskMapper.toDTO(newTask);
     }
 
-    public List<TaskDTO> getAll(String author, String assignee) {
+    public List<TaskWithTotalCommentsDTO> getAll(String author, String assignee) {
 
         List<Task> tasks = tasksRepository.findAllByAuthorAndAssignee(
                 author == null ? null: author.toLowerCase(),
                 assignee == null ? null: assignee.toLowerCase()
         );
 
-        return taskMapper.toDTO(tasks);
+        return taskMapper.toDTOWithTotalComments(tasks);
     }
 
     public List<TaskDTO> getAllQBE(String author, String assignee) {
@@ -189,12 +199,23 @@ public class TasksService {
 
         Comment comment = new Comment();
         comment.setText(addCommentRequest.getText());
+        comment.setAuthor(getAccount());
 
         Task task = taskOptional.get();
         task.addComment(comment);
 
-        System.err.println(task);
-
         tasksRepository.save(task);
+    }
+
+    public List<CommentDTO> getComments(Long taskId) {
+        Optional<Task> taskOptional = tasksRepository.findById(taskId);
+        if (taskOptional.isEmpty()) {
+            throw new TaskNotFoundException();
+        }
+
+        Task task = taskOptional.get();
+        List<Comment> comments = commentsRepository.findByTaskOrderByIdDesc(task);
+
+        return commentMapper.toDTO(comments);
     }
 }

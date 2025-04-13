@@ -14,16 +14,13 @@ public class TaskDTO {
 
     private String assignee;
 
-    private int total_comments;
-
     public TaskDTO(
             String id,
             String title,
             String description,
             String status,
             String author,
-            String assignee,
-            int totalComments
+            String assignee
     ) {
         this.id = id;
         this.title = title;
@@ -31,7 +28,6 @@ public class TaskDTO {
         this.status = status;
         this.author = author;
         this.assignee = assignee;
-        this.total_comments = totalComments;
     }
 
     public String getId() {
@@ -80,13 +76,5 @@ public class TaskDTO {
 
     public void setAssignee(String assignee) {
         this.assignee = assignee;
-    }
-
-    public int getTotal_comments() {
-        return total_comments;
-    }
-
-    public void setTotal_comments(int total_comments) {
-        this.total_comments = total_comments;
     }
 }
