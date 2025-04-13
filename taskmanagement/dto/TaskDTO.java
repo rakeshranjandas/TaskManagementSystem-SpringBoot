@@ -1,7 +1,5 @@
 package taskmanagement.dto;
 
-import taskmanagement.entity.TaskStatus;
-
 public class TaskDTO {
 
     private String id;
@@ -14,12 +12,15 @@ public class TaskDTO {
 
     private String author;
 
-    public TaskDTO(String id, String title, String description, String status, String author) {
+    private String assignee;
+
+    public TaskDTO(String id, String title, String description, String status, String author, String assignee) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.author = author;
+        this.assignee = assignee;
     }
 
     public String getId() {
@@ -60,5 +61,13 @@ public class TaskDTO {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 }

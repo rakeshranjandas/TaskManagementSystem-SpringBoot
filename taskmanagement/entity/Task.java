@@ -1,10 +1,13 @@
 package taskmanagement.entity;
 
 import jakarta.persistence.*;
+import taskmanagement.enums.TaskStatus;
 
 @Entity
 @Table(name = "task")
 public class Task {
+
+    public static final String NO_ASSIGNEE = "none";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +19,10 @@ public class Task {
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status = TaskStatus.CREATED;
+
+    @ManyToOne
+    @JoinColumn(name = "assignee")
+    private Account assignee;
 
     @ManyToOne
     @JoinColumn(name = "author")
@@ -59,5 +66,29 @@ public class Task {
 
     public void setAuthor(Account author) {
         this.author = author;
+    }
+
+    public Account getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(Account assignee) {
+        this.assignee = assignee;
+    }
+
+    public void removeAssignee() {
+        this.assignee = null;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", assignee=" + assignee +
+                ", author=" + author +
+                '}';
     }
 }

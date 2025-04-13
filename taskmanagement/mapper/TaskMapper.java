@@ -16,7 +16,8 @@ public class TaskMapper {
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus().name(),
-                task.getAuthor().getUsername()
+                task.getAuthor().getUsername(),
+                task.getAssignee() == null ? Task.NO_ASSIGNEE: task.getAssignee().getUsername()
         );
     }
 

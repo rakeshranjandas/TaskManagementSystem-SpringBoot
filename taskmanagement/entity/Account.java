@@ -46,4 +46,17 @@ public class Account {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean equals(Account otherAccount) {
+        return otherAccount != null && this.id == otherAccount.id;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

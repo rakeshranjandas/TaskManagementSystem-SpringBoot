@@ -37,6 +37,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomJwtAuthenticationConvertor converter) throws Exception {
+        // [TODO] -> Separate SecurityFilterChain for public, basic auth and jwt auth
+
         return http
                 .httpBasic(Customizer.withDefaults())  // Enabling HTTP Basic Authentication
                 .oauth2ResourceServer(

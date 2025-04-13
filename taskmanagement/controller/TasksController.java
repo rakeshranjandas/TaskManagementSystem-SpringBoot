@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import taskmanagement.dto.TaskDTO;
 import taskmanagement.entity.Task;
+import taskmanagement.request.AssignTaskRequest;
 import taskmanagement.request.CreateTaskRequest;
+import taskmanagement.request.UpdateStatusRequest;
 import taskmanagement.service.TasksService;
 
 import java.util.List;
@@ -20,14 +22,11 @@ public class TasksController {
     private TasksService tasksService;
 
     @GetMapping
-    public ResponseEntity<List<TaskDTO>> getTasks(@RequestParam(name = "author", required = false) String author) {
-        List<TaskDTO> tasks = null;
-
-        if (author == null) {
-            tasks = tasksService.getAll();
-        } else {
-            tasks =  tasksService.getAllByAuthor(author);
-        }
+    public ResponseEntity<List<TaskDTO>> getTasks(
+            @RequestParam(name = "author", required = false) String author,
+            @RequestParam(name = "assignee", required = false) String assignee
+    ) {
+        List<TaskDTO> tasks = tasksService.getAll(author, assignee);
 
         return new ResponseEntity(tasks, HttpStatus.OK);
     }
@@ -35,5 +34,15 @@ public class TasksController {
     @PostMapping
     public TaskDTO createTask(@Valid @RequestBody CreateTaskRequest createTaskRequest) {
         return tasksService.create(createTaskRequest);
+    }
+
+    @PutMapping("/{taskId}/assign")
+    public TaskDTO assignTask(@PathVariable("taskId") Long taskId, @Valid @RequestBody AssignTaskRequest assignTaskRequest) {
+        return tasksService.assign(taskId, assignTaskRequest);
+    }
+
+    @PutMapping("/{taskId}/status")
+    public TaskDTO updateStatus(@PathVariable("taskId") Long taskId, @Valid @RequestBody UpdateStatusRequest updateStatusRequest) {
+        return tasksService.updateStatus(taskId, updateStatusRequest);
     }
 }
