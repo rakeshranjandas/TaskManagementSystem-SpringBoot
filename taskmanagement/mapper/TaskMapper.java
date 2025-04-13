@@ -17,7 +17,8 @@ public class TaskMapper {
                 task.getDescription(),
                 task.getStatus().name(),
                 task.getAuthor().getUsername(),
-                task.getAssignee() == null ? Task.NO_ASSIGNEE: task.getAssignee().getUsername()
+                task.getAssignee() == null ? Task.NO_ASSIGNEE: task.getAssignee().getUsername(),
+                task.getComments().size()
         );
     }
 

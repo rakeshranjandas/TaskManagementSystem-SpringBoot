@@ -3,6 +3,9 @@ package taskmanagement.entity;
 import jakarta.persistence.*;
 import taskmanagement.enums.TaskStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "task")
 public class Task {
@@ -27,6 +30,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "author")
     private Account author;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -78,6 +84,19 @@ public class Task {
 
     public void removeAssignee() {
         this.assignee = null;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        comment.setTask(this);
     }
 
     @Override

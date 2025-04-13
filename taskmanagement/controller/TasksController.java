@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import taskmanagement.dto.TaskDTO;
 import taskmanagement.entity.Task;
+import taskmanagement.request.AddCommentRequest;
 import taskmanagement.request.AssignTaskRequest;
 import taskmanagement.request.CreateTaskRequest;
 import taskmanagement.request.UpdateStatusRequest;
@@ -44,5 +45,11 @@ public class TasksController {
     @PutMapping("/{taskId}/status")
     public TaskDTO updateStatus(@PathVariable("taskId") Long taskId, @Valid @RequestBody UpdateStatusRequest updateStatusRequest) {
         return tasksService.updateStatus(taskId, updateStatusRequest);
+    }
+
+    @PostMapping("/{taskId}/comments")
+    public ResponseEntity addComment(@PathVariable("taskId") Long taskId, @Valid @RequestBody AddCommentRequest addCommentRequest) {
+        tasksService.addComment(taskId, addCommentRequest);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

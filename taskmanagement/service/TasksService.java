@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import taskmanagement.dto.TaskDTO;
 import taskmanagement.entity.Account;
+import taskmanagement.entity.Comment;
 import taskmanagement.entity.Task;
 import taskmanagement.enums.TaskStatus;
 import taskmanagement.exception.ForbiddenAssignException;
@@ -18,6 +19,7 @@ import taskmanagement.exception.TaskNotFoundException;
 import taskmanagement.mapper.TaskMapper;
 import taskmanagement.repository.AccountsRepository;
 import taskmanagement.repository.TasksRepository;
+import taskmanagement.request.AddCommentRequest;
 import taskmanagement.request.AssignTaskRequest;
 import taskmanagement.request.CreateTaskRequest;
 import taskmanagement.request.UpdateStatusRequest;
@@ -59,8 +61,6 @@ public class TasksService {
     }
 
     public List<TaskDTO> getAll(String author, String assignee) {
-        System.err.println(author);
-        System.err.println(assignee);
 
         List<Task> tasks = tasksRepository.findAllByAuthorAndAssignee(
                 author == null ? null: author.toLowerCase(),
@@ -179,5 +179,22 @@ public class TasksService {
             throw new InvalidTaskStatusException();
         }
 
+    }
+
+    public void addComment(Long taskId, @Valid AddCommentRequest addCommentRequest) {
+        Optional<Task> taskOptional = tasksRepository.findById(taskId);
+        if (taskOptional.isEmpty()) {
+            throw new TaskNotFoundException();
+        }
+
+        Comment comment = new Comment();
+        comment.setText(addCommentRequest.getText());
+
+        Task task = taskOptional.get();
+        task.addComment(comment);
+
+        System.err.println(task);
+
+        tasksRepository.save(task);
     }
 }
