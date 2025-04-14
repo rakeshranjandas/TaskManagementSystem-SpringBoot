@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import taskmanagement.dto.CommentDTO;
@@ -23,12 +24,14 @@ import taskmanagement.mapper.TaskMapper;
 import taskmanagement.repository.AccountsRepository;
 import taskmanagement.repository.CommentsRepository;
 import taskmanagement.repository.TasksRepository;
+import taskmanagement.repository.specifications.TaskSpecifications;
 import taskmanagement.request.AddCommentRequest;
 import taskmanagement.request.AssignTaskRequest;
 import taskmanagement.request.CreateTaskRequest;
 import taskmanagement.request.UpdateStatusRequest;
 import taskmanagement.security.AccountAdapter;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,64 +75,21 @@ public class TasksService {
 
     public List<TaskWithTotalCommentsDTO> getAll(String author, String assignee) {
 
-        List<Task> tasks = tasksRepository.findAllByAuthorAndAssignee(
-                author == null ? null: author.toLowerCase(),
-                assignee == null ? null: assignee.toLowerCase()
-        );
-
-        return taskMapper.toDTOWithTotalComments(tasks);
-    }
-
-    public List<TaskDTO> getAllQBE(String author, String assignee) {
-        Task probe = createProbeTask(author, assignee);
-        System.err.println(probe);
-
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAll()
-                .withIgnoreNullValues();
-
-        Example<Task> example = Example.of(probe, matcher);
-        List<Task> tasks = tasksRepository.findAll(example, Sort.by(Sort.Direction.DESC, "id"));
-
-        return taskMapper.toDTO(tasks);
-    }
-
-    private Task createProbeTask(String author, String assignee) {
-        Task probe = new Task();
+        Specification<Task> spec = Specification.where(null); // Start a specification
 
         if (author != null) {
             Optional<Account> authorAccount = accountsRepository.findByUsernameIgnoreCase(author);
-            if (authorAccount.isPresent()) {
-                probe.setAuthor(authorAccount.get());
-            }
+            spec = spec.and(TaskSpecifications.hasAuthor(authorAccount));
         }
 
         if (assignee != null) {
-            Optional<Account> assigneeAccount = accountsRepository.findByUsernameIgnoreCase(assignee);
-            if (assigneeAccount.isPresent()) {
-                probe.setAssignee(assigneeAccount.get());
-            }
+            Optional<Account> authorAccount = accountsRepository.findByUsernameIgnoreCase(assignee);
+            spec = spec.and(TaskSpecifications.hasAssignee(authorAccount));
         }
 
-        return probe;
-    }
+        List<Task> tasks = tasksRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
 
-    public List<TaskDTO> getAll() {
-        Iterable<Task> tasks = tasksRepository.findByOrderByIdDesc();
-
-        return taskMapper.toDTO(tasks);
-    }
-
-    public List<TaskDTO> getAllByAuthor(String author) {
-        Optional<Account> authorAccount = accountsRepository.findByUsernameIgnoreCase(author);
-
-        if (authorAccount.isEmpty()) {
-            return List.of();
-        }
-
-        List<Task> tasksByAuthor = tasksRepository.findByAuthorOrderByIdDesc(authorAccount.get());
-
-        return taskMapper.toDTO(tasksByAuthor);
+        return taskMapper.toDTOWithTotalComments(tasks);
     }
 
     public TaskDTO assign(Long taskId, AssignTaskRequest assignTaskRequest) {
